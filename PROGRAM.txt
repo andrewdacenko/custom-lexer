@@ -1,0 +1,7 @@
+PROGRAM something;
+VAR hello, some:
+    SIGNAL
+    INTEGER
+    [2 .. 5, 9 .. 18];
+VAR kkk: FLOAT;
+BEGIN END.
