@@ -5,7 +5,7 @@ export const KEYWORDS = {
     END: 404,
 };
 
-export const IDENTIFICATORS = {
+export const IDENTIFIERS = {
     SIGNAL: 1001,
     COMPLEX: 1002,
     INTEGER: 1003,

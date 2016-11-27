@@ -1,6 +1,6 @@
 import Table from 'cli-table';
-import reader from './src/reader';
-import {Lexer} from './src/parser';
+import reader from './reader';
+import analyze from './src/compiler/lexer';
 
 try {
     run();
@@ -10,8 +10,7 @@ try {
 
 async function run() {
     const data = await reader('PROGRAM.txt');
-    const lexer = new Lexer(data);
-    const {program, tables} = lexer.parse();
+    const {program, tables} = analyze(data);
 
     const programTable = new Table({
         head: ['Program']
