@@ -1,6 +1,12 @@
 export const Keyword = {
-    PROGRAM: 'PROGRAM',
-    BEGIN: 'BEGIN',
     END: 'END',
-    VAR: 'VAR'
+    VAR: 'VAR',
+    EXT: 'EXT',
+    BEGIN: 'BEGIN',
+    FLOAT: 'FLOAT',
+    SIGNAL: 'SIGNAL',
+    PROGRAM: 'PROGRAM',
+    COMPLEX: 'COMPLEX',
+    INTEGER: 'INTEGER',
+    BLOCKFLOAT: 'BLOCKFLOAT',
 };

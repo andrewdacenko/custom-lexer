@@ -14,7 +14,7 @@
     "tdd": "mocha --require babel-polyfill --compilers js:babel-register -w src/**/*.spec.js"
   },
   "dependencies": {
-    "@reactivex/rxjs": "^5.0.0-rc.4",
+    "@reactivex/rxjs": "^5.0.1",
     "material-ui": "^0.16.4",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",

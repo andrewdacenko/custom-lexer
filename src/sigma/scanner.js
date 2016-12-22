@@ -40,16 +40,7 @@ export class Scanner {
     };
 
     static isKeyword(id) {
-        switch (id.length) {
-            case 3:
-                return (id === Keyword.END) || (id === Keyword.VAR);
-            case 5:
-                return (id === Keyword.BEGIN);
-            case 7:
-                return (id === Keyword.PROGRAM);
-            default:
-                return false;
-        }
+        return Object.keys(Keyword).indexOf(id) !== -1;
     }
 
     getIdentifier() {
@@ -173,11 +164,7 @@ export class Scanner {
 
         const id = this.getIdentifier();
 
-        // There are keywords with only 3, 5 and 7 chars
-        // Thus, it must be an identifier.
-        if ([3, 5, 7].indexOf(id.length) === -1) {
-            type = Token.Identifier;
-        } else if (Scanner.isKeyword(id)) {
+        if (Scanner.isKeyword(id)) {
             type = Token.Keyword;
         } else {
             type = Token.Identifier;
