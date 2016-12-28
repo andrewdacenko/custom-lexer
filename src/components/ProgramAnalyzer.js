@@ -3,6 +3,7 @@ import Chip from 'material-ui/Chip';
 import {Card, CardText} from 'material-ui/Card';
 
 import {InformationTable} from './InformationTable';
+import {Parser} from './../sigma/parser';
 
 export class ProgramAnalyzer extends Component {
     constructor(props, context) {
@@ -15,6 +16,10 @@ export class ProgramAnalyzer extends Component {
             errorChip: {
                 margin: 4,
                 backgroundColor: 'red'
+            },
+            successChip: {
+                margin: 4,
+                backgroundColor: 'green'
             },
             wrapper: {
                 display: 'flex',
@@ -36,11 +41,14 @@ export class ProgramAnalyzer extends Component {
 
     renderTokens(tokens) {
         return tokens.map((token, index) => (
-            <Chip
-                key={index}
-                style={this.styles.chip}
-            >
-                {token.type} - {token.value}
+            <Chip key={index} style={this.styles.chip}>
+                {token.type} `<b>{token.value}</b>`
+                {' at '}
+                <b>
+                <span>{token.loc.start.line}:{token.loc.start.column}</span>
+                {' - '}
+                <span>{token.loc.end.line}:{token.loc.end.column}</span>
+                </b>
             </Chip>
         ));
     }
@@ -51,6 +59,22 @@ export class ProgramAnalyzer extends Component {
                 {error.description} on {error.lineNumber}:{error.column}
             </Chip>
         ));
+    }
+
+    renderAnalyzeErrors(tokens) {
+        let report;
+
+        try {
+            const parser = new Parser(tokens);
+            parser.parse();
+
+            report = <Chip style={this.styles.successChip}>Syntax is Correct</Chip>;
+        } catch (err) {
+            const pos = err.token ? ` at ${err.token.loc.start.line}:${err.token.loc.start.column}` : '';
+            report = <Chip style={this.styles.errorChip}>{err.message} {pos}</Chip>;
+        }
+
+        return <CardText style={this.styles.wrapper} key={'analyze-report'}>{report}</CardText>;
     }
 
     renderTables(tokens) {
@@ -69,12 +93,13 @@ export class ProgramAnalyzer extends Component {
         if (!tokens) return null;
 
         return (
-            <div>
+            <div style={{flex: 3}}>
                 <Card style={this.styles.card}>
                     <CardText style={this.styles.wrapper} key={'program'}>
                         {this.renderTokens(tokens)}
                         {this.renderErrors(tokens)}
                     </CardText>
+                    {this.renderAnalyzeErrors(tokens)}
                 </Card>
                 <div key="tables" style={this.styles.tables}>
                     {this.renderTables(tokens)}

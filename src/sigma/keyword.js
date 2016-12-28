@@ -10,3 +10,11 @@ export const Keyword = {
     INTEGER: 'INTEGER',
     BLOCKFLOAT: 'BLOCKFLOAT',
 };
+
+export const Constants = [
+    Keyword.FLOAT,
+    Keyword.SIGNAL,
+    Keyword.COMPLEX,
+    Keyword.INTEGER,
+    Keyword.BLOCKFLOAT
+];

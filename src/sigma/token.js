@@ -17,3 +17,21 @@ export const TokenName = {
     [Token.MultiPunctuator]: 'MultiPunctuator',
     [Token.Comment]: 'Comment'
 };
+
+export const TokenType = {
+    isIdentifier(type) {
+        return TokenName[Token.Identifier] === type;
+    },
+    isKeyword(type) {
+        return TokenName[Token.Keyword] === type;
+    },
+    isNumber(type) {
+        return TokenName[Token.Number] === type;
+    },
+    isPunctuator(type) {
+        return TokenName[Token.Punctuator] === type;
+    },
+    isMultiPunctuator(type) {
+        return TokenName[Token.MultiPunctuator] === type;
+    }
+};

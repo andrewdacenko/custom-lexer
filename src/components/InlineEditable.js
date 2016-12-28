@@ -41,7 +41,7 @@ export class InlineEditable extends Component {
 
     render() {
         return (
-            <Card style={{margin: 10}}>
+            <Card style={{margin: 10, flex: 1}}>
                 <CardText>
                     <TextField
                         hintText="Put your program here"

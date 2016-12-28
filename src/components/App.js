@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import {Subject} from '@reactivex/rxjs';
 import AppBar from 'material-ui/AppBar';
 
-import {analyze} from '../compiler/lexer';
 import {tokenize} from '../sigma/sigma';
 
 import {InlineEditable} from './InlineEditable';
@@ -23,7 +22,6 @@ class App extends Component {
         this.state = {
             program: '',
             open: false,
-            analyzedProgram: {}
         };
 
         this.update$ = new Subject();
@@ -33,13 +31,10 @@ class App extends Component {
         this.subscription = this.update$.asObservable()
             .debounceTime(100)
             .subscribe((value) => {
-                const {program, tables} = analyze(value);
                 const tokens = tokenize(value);
 
                 this.setState({
                     tokens,
-                    program: value,
-                    analyzedProgram: {program, tables}
                 });
             });
     }
@@ -60,13 +55,17 @@ class App extends Component {
                 key="appbar"
                 title="SIGNAL COMPILER"
             />
-            <InlineEditable
-                onInputChanged={(event) => {
-                    this.update$.next(event);
-                }}
-                onBuildTreeClick={this.showBuildTree}
-            />
-            <ProgramAnalyzer tokens={this.state.tokens}/>
+            <div style={{display: 'flex'}}>
+                <InlineEditable
+                    onInputChanged={(event) => {
+                        this.update$.next(event);
+                    }}
+                    onBuildTreeClick={this.showBuildTree}
+                />
+                <ProgramAnalyzer
+                    tokens={this.state.tokens}
+                />
+            </div>
             <ProgramTree
                 open={this.state.open}
                 onRequestClose={() => {
@@ -75,7 +74,6 @@ class App extends Component {
                     });
                 }}
                 tokens={this.state.tokens}
-                {...this.state.analyzedProgram}
             />
         </div>;
     }
