@@ -1,13 +1,60 @@
 import React, {Component} from 'react';
 import TextField from 'material-ui/TextField';
-import FlatButton from 'material-ui/FlatButton';
-import {Card, CardText, CardActions} from 'material-ui/Card';
+import {Card, CardText} from 'material-ui/Card';
+import Chip from 'material-ui/Chip';
 
 const styles = {
     inlineEditable: {}
 };
 
-const DEFAULT_PROGRAM = ` 
+const SAMPLES = [{
+    label: 'Minimal',
+    code: `
+PROGRAM a; 
+BEGIN END.
+`
+}, {
+    label: 'Simple',
+    code: `
+PROGRAM a;
+VAR
+BEGIN END.
+`
+}, {
+    label: 'Normal',
+    code: `
+PROGRAM a;
+VAR a: [1..2];
+BEGIN END.
+`
+}, {
+    label: 'Complex',
+    code: `
+PROGRAM a;
+VAR a, b1, c3: 
+    SIGNAL 
+    FLOAT 
+    [ 12..22
+    , 33..22
+    ];
+BEGIN END.
+`
+}, {
+    label: 'Hard',
+    code: `
+PROGRAM a;
+VAR a, b1, c3: 
+    SIGNAL 
+    FLOAT 
+    [ 12..22
+    , 33..22
+    ];
+VAR k: INTEGER;
+BEGIN END.
+`
+}, {
+    label: 'With Comments',
+    code: ` 
 PROGRAM something;
 VAR hello, some, q:
     SIGNAL
@@ -18,14 +65,31 @@ VAR hello, some, q:
      *)
 VAR kkk: FLOAT;
 BEGIN END.
-`;
+`
+}, {
+    label: 'Wrong lexem',
+    code: `PROGRAM 1a`
+}, {
+    label: 'Wrong syntax',
+    code: `
+PROGRAM something;
+VAR hello, some, q:
+    SIGNAL
+    INTEGER
+    [2 .. 5, 9 .. 18];
+    (* 
+     PROGRAM hidden;
+     *)
+VAR kkk; FLOAT;
+BEGIN END.`
+}];
 
 export class InlineEditable extends Component {
     constructor(props, context) {
         super(props, context);
 
         this.state = {
-            value: DEFAULT_PROGRAM
+            value: SAMPLES[5].code
         };
 
         this.props.onInputChanged(this.state.value);
@@ -53,10 +117,23 @@ export class InlineEditable extends Component {
                         fullWidth={true}
                         value={this.state.value}
                     />
+
+                    <div>{SAMPLES.map((item, index) => (
+                        <Chip
+                            key={index}
+                            style={{margin: 4}}
+                            onTouchTap={() => {
+                                this.setState({
+                                    value: item.code
+                                });
+
+                                this.props.onInputChanged(item.code);
+                            }}
+                        >
+                            {item.label}
+                        </Chip>
+                    ))}</div>
                 </CardText>
-                <CardActions style={{textAlign: 'center'}}>
-                    <FlatButton label="Build Tree" onClick={this.props.onBuildTreeClick}/>
-                </CardActions>
             </Card>
         );
     }

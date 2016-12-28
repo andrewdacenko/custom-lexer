@@ -87,4 +87,23 @@ describe.only('Parser', () => {
         const parser = new Parser(tokens);
         parser.parse();
     });
+
+    it('should fail program with multiple', () => {
+        const tokens = tokenize(`
+            PROGRAM a;
+            VAR a, b1, c3: 
+                SIGNAL 
+                FLOAT 
+                [ 12..22
+                , 33..22
+                ];
+            VAR k INTEGER;
+            BEGIN END.
+        `);
+
+        const parser = new Parser(tokens);
+        (() => {
+            parser.parse();
+        }).should.throw();
+    });
 });

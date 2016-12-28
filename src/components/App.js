@@ -6,7 +6,6 @@ import {tokenize} from '../sigma/sigma';
 
 import {InlineEditable} from './InlineEditable';
 import {ProgramAnalyzer} from './ProgramAnalyzer';
-import {ProgramTree} from './ProgramTree';
 
 const styles = {
     container: {
@@ -53,7 +52,8 @@ class App extends Component {
         return <div className={styles.container}>
             <AppBar
                 key="appbar"
-                title="SIGNAL COMPILER"
+                iconElementLeft={<div></div>}
+                title="SIGNAL ANALYZER"
             />
             <div style={{display: 'flex'}}>
                 <InlineEditable
@@ -66,15 +66,6 @@ class App extends Component {
                     tokens={this.state.tokens}
                 />
             </div>
-            <ProgramTree
-                open={this.state.open}
-                onRequestClose={() => {
-                    this.setState({
-                        open: false
-                    });
-                }}
-                tokens={this.state.tokens}
-            />
         </div>;
     }
 }

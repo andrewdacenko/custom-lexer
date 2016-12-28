@@ -65,6 +65,7 @@ export class Parser {
     }
 
     parseBlock() {
+        this.getNextToken();
         this.parseVariables();
 
         if (this.token.value !== Keyword.BEGIN) {
@@ -78,16 +79,16 @@ export class Parser {
     }
 
     parseVariables() {
-        this.getNextToken();
         if (this.token.value === Keyword.VAR) {
             this.parseDeclarations();
+            return this.parseVariables();
         }
 
         if (this.token.value === Keyword.BEGIN) {
             return;
         }
 
-        this.parseVariables();
+        throw new ParserError('Unexpected input', this.token);
     }
 
     parseDeclarations() {
