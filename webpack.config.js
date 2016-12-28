@@ -2,30 +2,56 @@ const {resolve} = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+const isProd = process.env.NODE_ENV === 'production';
+
+const entry = [].concat(
+    isProd ? [] : [
+            'react-hot-loader/patch',
+            // activate HMR for React
+
+            'webpack-dev-server/client?http://localhost:8080',
+            // bundle the client for webpack-dev-server
+            // and connect to the provided endpoint
+
+            'webpack/hot/only-dev-server',
+            // bundle the client for hot reloading
+            // only- means to only hot reload for successful updates
+        ],
+    './index.js'
+);
+
+const plugins = [
+    new HtmlWebpackPlugin({
+        // Required
+        inject: false,
+        template: require('html-webpack-template'),
+        appMountId: 'app',
+        devServer: isProd ? undefined : 'http://localhost:8080',
+        title: 'Sigma Analyzer',
+        minify: {
+            collapseWhitespace: true
+        }
+    })
+].concat(isProd ? [
+        new webpack.optimize.UglifyJsPlugin({
+            compress: {
+                warnings: false
+            }
+        })
+    ] : [
+        new webpack.HotModuleReplacementPlugin(),
+        new webpack.NamedModulesPlugin(),
+    ]);
+
 module.exports = {
-    entry: [
-        'react-hot-loader/patch',
-        // activate HMR for React
-
-        'webpack-dev-server/client?http://localhost:8080',
-        // bundle the client for webpack-dev-server
-        // and connect to the provided endpoint
-
-        'webpack/hot/only-dev-server',
-        // bundle the client for hot reloading
-        // only- means to only hot reload for successful updates
-
-
-        './index.js'
-        // the entry point of our app
-    ],
+    entry,
     output: {
         filename: 'bundle.js',
         // the output bundle
 
         path: resolve(__dirname, 'dist'),
 
-        publicPath: '/'
+        publicPath: './'
         // necessary for HMR to know where to load the hot update chunks
     },
 
@@ -77,16 +103,5 @@ module.exports = {
         ],
     },
 
-    plugins: [
-        new webpack.HotModuleReplacementPlugin(),
-        new webpack.NamedModulesPlugin(),
-        new HtmlWebpackPlugin({
-            // Required
-            inject: false,
-            template: require('html-webpack-template'),
-            appMountId: 'app',
-            devServer: 'http://localhost:8080',
-            title: 'Custom Lexer',
-        })
-    ],
+    plugins
 };

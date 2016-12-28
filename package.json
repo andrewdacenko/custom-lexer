@@ -10,6 +10,8 @@
   "license": "MIT",
   "scripts": {
     "start": "webpack-dev-server",
+    "build": "NODE_ENV=production webpack",
+    "deploy-demo": "git push origin :gh-pages && git subtree push --prefix dist origin gh-pages",
     "test": "mocha --require babel-polyfill --compilers js:babel-register src/**/*.spec.js",
     "tdd": "mocha --require babel-polyfill --compilers js:babel-register -w src/**/*.spec.js"
   },
