@@ -12,6 +12,7 @@ export const Keyword = {
 };
 
 export const Constants = [
+    Keyword.EXT,
     Keyword.FLOAT,
     Keyword.SIGNAL,
     Keyword.COMPLEX,
