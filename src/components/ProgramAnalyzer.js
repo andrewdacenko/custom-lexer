@@ -64,6 +64,10 @@ export class ProgramAnalyzer extends Component {
     renderAnalyzeErrors(tokens) {
         let report;
 
+        if (tokens.errors) {
+            return null;
+        }
+
         try {
             const parser = new Parser(tokens);
             parser.parse();
