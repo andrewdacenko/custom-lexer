@@ -80,7 +80,7 @@ describe.only('Parser', () => {
                 [ 12..22
                 , 33..22
                 ];
-            VAR k: INTEGER;
+            k: INTEGER;
             BEGIN END.
         `);
 
@@ -97,7 +97,7 @@ describe.only('Parser', () => {
                 [ 12..22
                 , 33..22
                 ];
-            VAR k INTEGER;
+            k INTEGER;
             BEGIN END.
         `);
 

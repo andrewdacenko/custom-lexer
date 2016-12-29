@@ -49,7 +49,7 @@ VAR a, b1, c3:
     [ 12..22
     , 33..22
     ];
-VAR k: INTEGER;
+k: INTEGER;
 BEGIN END.
 `
 }, {
@@ -63,7 +63,7 @@ VAR hello, some, q:
     (* 
      PROGRAM hidden;
      *)
-VAR kkk: FLOAT;
+kkk: FLOAT;
 BEGIN END.
 `
 }, {

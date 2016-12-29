@@ -81,7 +81,6 @@ export class Parser {
     parseVariables() {
         if (this.token.value === Keyword.VAR) {
             this.parseDeclarations();
-            return this.parseVariables();
         }
 
         if (this.token.value === Keyword.BEGIN) {
@@ -113,7 +112,7 @@ export class Parser {
             throw new ParserError('Punctuation error, `;` expected', this.token);
         }
 
-        this.getNextToken();
+        this.parseDeclarations();
     }
 
     parseAttributeBlock() {
