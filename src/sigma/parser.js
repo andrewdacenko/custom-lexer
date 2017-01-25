@@ -66,10 +66,9 @@ export class Parser {
         if (!TokenType.isIdentifier(token.type)) {
             throw new ParserError(`Program should have name`, token);
         }
-        node.add(new SigmaNode({
-            name: '<procedure-identifier>',
-            token
-        }));
+        const identifier = new SigmaNode({name: '<procedure-identifier>'});
+        identifier.add(new SigmaNode({token}));
+        node.add(identifier);
 
         token = this.getNextToken();
         if (token.value !== ';') {
@@ -148,7 +147,6 @@ export class Parser {
         token = this.getNextToken();
         if (token.value === ',') {
             node.add(new SigmaNode({token}));
-            // return this.parseDeclarations(tree);
             token = this.parseVariable(node);
         }
 
@@ -179,7 +177,6 @@ export class Parser {
         token = this.getNextToken();
         if (token.value === ',') {
             tree.add(new SigmaNode({token}));
-            // return this.parseDeclarations(tree);
             token = this.parseVariable(tree);
         }
 
@@ -187,11 +184,9 @@ export class Parser {
     }
 
     parseAttributeBlock(tree) {
-        const node = new SigmaNode({name: '<attribute>'});
-        tree.add(node);
         let token = this.getNextToken();
-        this.parseAttribute(token, node);
-        return this.parseAttributesList(node);
+        this.parseAttribute(token, tree);
+        return this.parseAttributesList(tree);
     }
 
     parseAttributesList(tree) {
@@ -205,17 +200,19 @@ export class Parser {
     }
 
     parseAttribute(token, tree) {
+        const node = new SigmaNode({name: '<attribute>'});
+        tree.add(node);
         const isConstant = Constants.includes(token.value);
 
         if (!isConstant) {
             if (token.value === '[') {
-                tree.add(new SigmaNode({token}));
-                return this.parseRangeBlock(tree);
+                node.add(new SigmaNode({token}));
+                return this.parseRangeBlock(node);
             } else {
                 throw new ParserError('No Attribute type defined', token);
             }
         }
-        tree.add(new SigmaNode({token}));
+        node.add(new SigmaNode({token}));
 
         return token;
     }
