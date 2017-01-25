@@ -1,42 +1,51 @@
-import React, {Component} from 'react';
-import Dialog from 'material-ui/Dialog'
+import React from 'react';
+import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
+import RaisedButton from 'material-ui/RaisedButton';
 
-export const ProgramTree = ({
-    open,
-    onRequestClose
-}) => {
-    const actions = [
-        <FlatButton
-            label="Close"
-            primary={true}
-            onClick={onRequestClose}
-        />
-    ];
-
-    return (
-        <Dialog
-            title="Program Tree"
-            actions={actions}
-            modal={false}
-            open={open}
-            onRequestClose={onRequestClose}
-            autoScrollBodyContent={true}
-        >
-
-        </Dialog>
-    );
+const styles = {
+    radioButton: {
+        marginTop: 16,
+    },
 };
 
-function renderTree(program) {
-    // const parsed = parse(program);
+export class ProgramTree extends React.Component {
+    state = {
+        open: false,
+    };
 
-    // if (typeof parsed === 'string') {
-    //     return <div>{parsed}</div>;
-    // }
+    handleOpen = () => {
+        this.setState({open: true});
+    };
 
-    // return (program || []).map((lexem, index) => (
-    //     <div key={index}>{lexem.token}</div>
-    // ));
-    return null;
+    handleClose = () => {
+        this.setState({open: false});
+    };
+
+    render() {
+        const actions = [
+            <FlatButton
+                label="Close"
+                primary={true}
+                keyboardFocused={true}
+                onTouchTap={this.handleClose}
+            />
+        ];
+
+        return (
+            <div>
+                <RaisedButton label="Program Tree" onTouchTap={this.handleOpen} />
+                <Dialog
+                    title="Scrollable Dialog"
+                    actions={actions}
+                    modal={false}
+                    open={this.state.open}
+                    onRequestClose={this.handleClose}
+                    autoScrollBodyContent={true}
+                >
+                    Hello
+                </Dialog>
+            </div>
+        );
+    }
 }

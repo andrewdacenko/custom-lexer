@@ -1,5 +1,7 @@
 export const Punctuator = {
     Dot: '.',
+    Plus: '+',
+    Dash: '-',
     Comma: ',',
     Colon: ':',
     Semicolon: ';',

@@ -180,6 +180,78 @@ export class Scanner {
         };
     }
 
+    scanPhone() {
+        const token = {
+            value: '+',
+            lineNumber: this.lineNumber,
+            lineStart: this.lineStart,
+            start: this.index,
+            end: this.index
+        };
+        this.index++;
+
+        const three = this.scanNumber();
+        if (three.value !== '38') {
+            this.throwUnexpectedToken();
+        }
+
+        if (this.source[this.index] !== Punctuator.OpeningBracket) {
+            this.throwUnexpectedToken();
+        }
+
+        this.index++;
+        const region = this.scanIdentifier();
+        if (region.value.length !== 3) {
+            this.throwUnexpectedToken();
+        }
+
+        if (this.source[this.index] !== Punctuator.ClosingBracket){
+            this.throwUnexpectedToken();
+        }
+
+        this.index++;
+        if (!Character.isDigit(this.source.charCodeAt(this.index))) {
+            this.throwUnexpectedToken();
+        }
+        const startNumber = this.scanNumber();
+        if (startNumber.value.length !== 3) {
+            this.throwUnexpectedToken();
+        }
+
+        if (this.source[this.index] !== Punctuator.Dash){
+            this.throwUnexpectedToken();
+        }
+
+        this.index++;
+        if (!Character.isDigit(this.source.charCodeAt(this.index))) {
+            this.throwUnexpectedToken();
+        }
+        const midNumber = this.scanNumber();
+        if (midNumber.value.length !== 2) {
+            this.throwUnexpectedToken();
+        }
+
+        if (this.source[this.index] !== Punctuator.Dash){
+            this.throwUnexpectedToken();
+        }
+
+        this.index++;
+        if (!Character.isDigit(this.source.charCodeAt(this.index))) {
+            this.throwUnexpectedToken();
+        }
+        const lastNumber = this.scanNumber();
+        if (lastNumber.value.length !== 2) {
+            this.throwUnexpectedToken();
+        }
+
+        return {
+            ...token,
+            type: Token.Number,
+            value: `+38[${region.value}]${startNumber.value}-${midNumber.value}-${lastNumber.value}`,
+            end: this.index
+        }
+    }
+
     scanPunctuator() {
         const token = {
             value: '',
@@ -193,6 +265,9 @@ export class Scanner {
 
         let str = this.source[this.index];
         switch (str) {
+            case Punctuator.Plus:
+                return this.scanPhone();
+                break;
             case Punctuator.Dot:
                 ++this.index;
                 if (this.source[this.index] === Punctuator.Dot) {

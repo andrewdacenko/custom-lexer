@@ -3,6 +3,7 @@ import Chip from 'material-ui/Chip';
 import {Card, CardText} from 'material-ui/Card';
 
 import {InformationTable} from './InformationTable';
+import {ProgramTree} from './ProgramTree';
 import {Parser} from './../sigma/parser';
 
 export class ProgramAnalyzer extends Component {
@@ -62,15 +63,15 @@ export class ProgramAnalyzer extends Component {
     }
 
     renderAnalyzeErrors(tokens) {
-        let report;
+        let report, tree;
 
-        if (tokens.errors) {
+        if (tokens.errors.length) {
             return null;
         }
 
         try {
             const parser = new Parser(tokens);
-            parser.parse();
+            tree = parser.parse();
 
             report = <Chip style={this.styles.successChip}>Syntax is Correct</Chip>;
         } catch (err) {
@@ -78,7 +79,10 @@ export class ProgramAnalyzer extends Component {
             report = <Chip style={this.styles.errorChip}>{err.message} {pos}</Chip>;
         }
 
-        return <CardText style={this.styles.wrapper} key={'analyze-report'}>{report}</CardText>;
+        return <CardText style={this.styles.wrapper} key={'analyze-report'}>
+            {report}
+            <ProgramTree tree={tree} />
+        </CardText>;
     }
 
     renderTables(tokens) {

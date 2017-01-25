@@ -9,6 +9,19 @@ export class ParserError extends Error {
     }
 }
 
+export class SigmaNode {
+    children = [];
+
+    constructor({name, token}) {
+        this.name = name;
+        this.token = {...token};
+    }
+
+    add(node) {
+        this.children.push(node);
+    }
+}
+
 export class Parser {
     constructor(tokens) {
         this.tokens = tokens;
@@ -16,11 +29,13 @@ export class Parser {
     }
 
     getNextToken() {
-        this.token = this.tokens[++this.index];
+        const token = this.tokens[++this.index];
 
-        if (!this.token) {
-            throw new ParserError('Unexpected End of program', this.token);
+        if (!token) {
+            throw new ParserError('Unexpected End of program', token);
         }
+
+        return {...token};
     }
 
     parse() {
@@ -28,163 +43,208 @@ export class Parser {
             throw new ParserError('No Code found');
         }
 
-        return this.parseProgram();
+        const tree = new SigmaNode({
+            name: '<signal-program>',
+        });
+
+        return this.parseProgram(tree);
     }
 
-    parseProgram() {
-        this.getNextToken();
+    parseProgram(tree) {
+        let token = this.getNextToken();
 
-        if (this.token.value !== Keyword.PROGRAM) {
+        const node = new SigmaNode({
+            name: '<program>'
+        });
+
+        if (token.value !== Keyword.PROGRAM) {
             throw new ParserError(`Program should start with ${Keyword.PROGRAM} keyword`);
         }
 
-        this.getNextToken();
-        if (!TokenType.isIdentifier(this.token.type)) {
-            throw new ParserError(`Program should have name`, this.token);
+        node.add(new SigmaNode({token}));
+
+        token = this.getNextToken();
+        if (!TokenType.isIdentifier(token.type)) {
+            throw new ParserError(`Program should have name`, token);
         }
 
-        this.getNextToken();
-        if (this.token.value !== ';') {
-            throw new ParserError('Wrong punctuation', this.token);
+        node.add(new SigmaNode({
+            name: '<procedure-identifier>',
+            token
+        }));
+
+        token = this.getNextToken();
+        if (token.value !== ';') {
+            throw new ParserError('Wrong punctuation', token);
         }
 
-        this.parseBlock();
+        node.add(new SigmaNode({token}));
 
-        this.getNextToken();
-        if (this.token.value !== '.') {
-            throw new ParserError('Program should end with dot', this.token);
+        this.parseBlock(node);
+
+        token = this.getNextToken();
+        if (token.value !== '.') {
+            throw new ParserError('Program should end with dot', token);
         }
+
+        node.add(new SigmaNode({token}));
 
         try {
-            this.getNextToken();
+            token = this.getNextToken();
         } catch (err) {
-            return;
+            tree.add(node);
+            return tree;
         }
 
-        throw new ParserError('Unexpected input after program end', this.token);
+        throw new ParserError('Unexpected input after program end', token);
     }
 
-    parseBlock() {
-        this.getNextToken();
-        this.parseVariables();
+    parseBlock(tree) {
+        const node = new SigmaNode({
+            name: '<block>'
+        });
 
-        if (this.token.value !== Keyword.BEGIN) {
-            throw new ParserError('Block should start with BEGIN keyword', this.token);
+        let token = this.getNextToken();
+        token = this.parseVariables(token, node);
+
+        if (token.value !== Keyword.BEGIN) {
+            throw new ParserError('Block should start with BEGIN keyword', token);
         }
 
-        this.getNextToken();
-        if (this.token.value !== Keyword.END) {
-            throw new ParserError('Block should end with END keyword', this.token);
+        node.add(new SigmaNode({token}));
+
+        token = this.getNextToken();
+        if (token.value !== Keyword.END) {
+            throw new ParserError('Block should end with END keyword', token);
         }
+
+        tree.add(node);
     }
 
-    parseVariables() {
-        if (this.token.value === Keyword.VAR) {
-            this.parseDeclarations();
+    parseVariables(token, tree) {
+        if (token.value === Keyword.VAR) {
+            const node = new SigmaNode({
+                name: '<declarations>',
+                token
+            });
+            token = this.parseDeclarations(node);
+            tree.add(node);
         }
 
-        if (this.token.value === Keyword.BEGIN) {
-            return;
+        if (token.value === Keyword.BEGIN) {
+            return token;
         }
 
-        throw new ParserError('Unexpected input', this.token);
+        throw new ParserError('Unexpected input', token);
     }
 
-    parseDeclarations() {
-        this.getNextToken();
+    parseDeclarations(tree) {
+        let token = this.getNextToken();
 
-        if (!TokenType.isIdentifier(this.token.type)) {
-            return;
+        if (!TokenType.isIdentifier(token.type)) {
+            return token;
         }
 
-        this.getNextToken();
-        if (this.token.value === ',') {
-            return this.parseDeclarations();
+        tree.add(new SigmaNode({token}));
+
+        token = this.getNextToken();
+        if (token.value === ',') {
+            tree.add(new SigmaNode({token}));
+            return this.parseDeclarations(tree);
         }
 
-        if (this.token.value !== ':') {
-            throw new ParserError('Variables should have types', this.token);
+        if (token.value !== ':') {
+            throw new ParserError('Variables should have types', token);
         }
+        tree.add(new SigmaNode({token}));
 
-        this.parseAttributeBlock();
+        token = this.parseAttributeBlock(tree);
 
-        if (this.token.value !== ';') {
-            throw new ParserError('Punctuation error, `;` expected', this.token);
+        if (token.value !== ';') {
+            throw new ParserError('Punctuation error, `;` expected', token);
         }
+        tree.add(new SigmaNode({token}));
 
-        this.parseDeclarations();
+        return this.parseDeclarations(tree);
     }
 
-    parseAttributeBlock() {
-        this.getNextToken();
-        this.parseAttribute();
-        this.parseAttributesList();
-
-        if (this.token.value === ';') {
-            return;
-        }
+    parseAttributeBlock(tree) {
+        let token = this.getNextToken();
+        this.parseAttribute(token, tree);
+        return this.parseAttributesList(tree);
     }
 
-    parseAttributesList() {
-        this.getNextToken();
-        if (this.token.value === ';') {
-            return;
+    parseAttributesList(tree) {
+        let token = this.getNextToken();
+        if (token.value === ';') {
+            return token;
         }
 
-        this.parseAttribute();
-        this.parseAttributesList();
+        this.parseAttribute(token, tree);
+        return this.parseAttributesList(tree);
     }
 
-    parseAttribute() {
-        const isConstant = Constants.includes(this.token.value);
+    parseAttribute(token, tree) {
+        const isConstant = Constants.includes(token.value);
 
         if (!isConstant) {
-            if (this.token.value === '[') {
-                this.parseRangeBlock();
+            if (token.value === '[') {
+                tree.add(new SigmaNode({token}));
+                return this.parseRangeBlock(tree);
             } else {
-                throw new ParserError('No Attribute type defined', this.token);
+                throw new ParserError('No Attribute type defined', token);
             }
         }
+        tree.add(new SigmaNode({token}));
+
+        return token;
     }
 
-    parseRangeBlock() {
-        this.getNextToken();
-        this.parseRange();
-        this.parseRangeList();
+    parseRangeBlock(tree) {
+        let token = this.getNextToken();
+        this.parseRange(token, tree);
+        token = this.parseRangeList(tree);
 
-        if (this.token.value === ']') {
-            return;
+        if (token.value === ']') {
+            tree.add(new SigmaNode({token}));
+            return token;
         }
     }
 
-    parseRangeList() {
-        this.getNextToken();
-        if (this.token.value === ']') {
-            return;
+    parseRangeList(tree) {
+        let token = this.getNextToken();
+        if (token.value === ']') {
+            return token;
         }
 
-        if (this.token.value !== ',') {
-            throw new ParserError('Comma missing in range list', this.token);
+        if (token.value !== ',') {
+            throw new ParserError('Comma missing in range list', token);
         }
+        tree.add(new SigmaNode({token}));
 
-        this.getNextToken();
-        this.parseRange();
-        this.parseRangeList();
+        token = this.getNextToken();
+        this.parseRange(token, tree);
+        return this.parseRangeList(tree);
     }
 
-    parseRange() {
-        if (!TokenType.isNumber(this.token.type)) {
-            throw new ParserError('Range should have numeric as first argument', this.token);
+    parseRange(token, tree) {
+        const node = new SigmaNode({name: '<range>'});
+        if (!TokenType.isNumber(token.type)) {
+            throw new ParserError('Range should have numeric as first argument', token);
         }
+        node.add(new SigmaNode({token}));
 
-        this.getNextToken();
-        if (this.token.value !== '..') {
-            throw new ParserError('Range should have `..` between numbers', this.token);
+        token = this.getNextToken();
+        if (token.value !== '..') {
+            throw new ParserError('Range should have `..` between numbers', token);
         }
+        node.add(new SigmaNode({token}));
 
-        this.getNextToken();
-        if (!TokenType.isNumber(this.token.type)) {
-            throw new ParserError('Range should have numeric as second argument', this.token);
+        token = this.getNextToken();
+        if (!TokenType.isNumber(token.type)) {
+            throw new ParserError('Range should have numeric as second argument', token);
         }
+        node.add(new SigmaNode({token}));
+        tree.add(node);
     }
 }
