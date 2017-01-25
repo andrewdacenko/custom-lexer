@@ -79,9 +79,11 @@ export class ProgramAnalyzer extends Component {
             report = <Chip style={this.styles.errorChip}>{err.message} {pos}</Chip>;
         }
 
+        debugger;
+
         return <CardText style={this.styles.wrapper} key={'analyze-report'}>
             {report}
-            <ProgramTree tree={tree} />
+            <ProgramTree tree={tree} tables={tokens.tables} />
         </CardText>;
     }
 

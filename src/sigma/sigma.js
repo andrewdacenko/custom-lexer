@@ -20,20 +20,23 @@ export function tokenize(code) {
     }
 
     tokens.errors = tokenizer.errors();
-    tokens.tables = {
-        Identifiers: tokens.reduce((data, token) => {
-            if (token.type !== TokenName[Token.Identifier]) {
-                return data;
-            }
-            return {items: {...data.items, [token.value]: ++data.index}, index: data.index};
-        }, {items: {}, index: Token.Identifier * 100}).items,
-        Numbers: tokens.reduce((data, token) => {
-            if (token.type !== TokenName[Token.Number]) {
-                return data;
-            }
-            return {items: {...data.items, [token.value]: ++data.index}, index: data.index};
-        }, {items: {}, index: Token.Number * 100}).items
-    };
+    tokens.tables = Object.keys(Token).reduce((tables, name) => {
+        return {...tables, [name]: getTables(tokens, Token[name])};
+    }, {});
 
     return tokens;
+
+    function getTable(id) {
+        return (data, token) => {
+            if (token.type !== TokenName[id]) {
+                return data;
+            }
+            const index = ++data.index;
+            return {items: {...data.items, [token.value]: index}, index};
+        }
+    }
+
+    function getTables(tokens, id) {
+        return tokens.reduce(getTable(id), {items: {}, index: id * 100}).items;
+    }
 }

@@ -2,12 +2,7 @@ import React from 'react';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 import RaisedButton from 'material-ui/RaisedButton';
-
-const styles = {
-    radioButton: {
-        marginTop: 16,
-    },
-};
+import {TreeView} from './TreeView';
 
 export class ProgramTree extends React.Component {
     state = {
@@ -27,7 +22,6 @@ export class ProgramTree extends React.Component {
             <FlatButton
                 label="Close"
                 primary={true}
-                keyboardFocused={true}
                 onTouchTap={this.handleClose}
             />
         ];
@@ -36,14 +30,14 @@ export class ProgramTree extends React.Component {
             <div>
                 <RaisedButton label="Program Tree" onTouchTap={this.handleOpen} />
                 <Dialog
-                    title="Scrollable Dialog"
+                    title="Program Tree"
                     actions={actions}
                     modal={false}
                     open={this.state.open}
                     onRequestClose={this.handleClose}
                     autoScrollBodyContent={true}
                 >
-                    Hello
+                    <TreeView {...this.props} />
                 </Dialog>
             </div>
         );

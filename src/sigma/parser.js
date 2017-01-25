@@ -60,14 +60,12 @@ export class Parser {
         if (token.value !== Keyword.PROGRAM) {
             throw new ParserError(`Program should start with ${Keyword.PROGRAM} keyword`);
         }
-
         node.add(new SigmaNode({token}));
 
         token = this.getNextToken();
         if (!TokenType.isIdentifier(token.type)) {
             throw new ParserError(`Program should have name`, token);
         }
-
         node.add(new SigmaNode({
             name: '<procedure-identifier>',
             token
@@ -77,7 +75,6 @@ export class Parser {
         if (token.value !== ';') {
             throw new ParserError('Wrong punctuation', token);
         }
-
         node.add(new SigmaNode({token}));
 
         this.parseBlock(node);
@@ -86,7 +83,6 @@ export class Parser {
         if (token.value !== '.') {
             throw new ParserError('Program should end with dot', token);
         }
-
         node.add(new SigmaNode({token}));
 
         try {
@@ -110,23 +106,23 @@ export class Parser {
         if (token.value !== Keyword.BEGIN) {
             throw new ParserError('Block should start with BEGIN keyword', token);
         }
-
         node.add(new SigmaNode({token}));
 
         token = this.getNextToken();
         if (token.value !== Keyword.END) {
             throw new ParserError('Block should end with END keyword', token);
         }
+        node.add(new SigmaNode({token}));
 
         tree.add(node);
     }
 
     parseVariables(token, tree) {
+        const node = new SigmaNode({
+            name: '<variable-declarations>'
+        });
         if (token.value === Keyword.VAR) {
-            const node = new SigmaNode({
-                name: '<declarations>',
-                token
-            });
+            node.add(new SigmaNode({token}));
             token = this.parseDeclarations(node);
             tree.add(node);
         }
@@ -140,25 +136,28 @@ export class Parser {
 
     parseDeclarations(tree) {
         let token = this.getNextToken();
-
         if (!TokenType.isIdentifier(token.type)) {
             return token;
         }
-
-        tree.add(new SigmaNode({token}));
+        const node = new SigmaNode({name: '<declaration>'});
+        const variable = new SigmaNode({name: '<variable>'});
+        variable.add(new SigmaNode({token}));
+        node.add(variable);
+        tree.add(node);
 
         token = this.getNextToken();
         if (token.value === ',') {
-            tree.add(new SigmaNode({token}));
-            return this.parseDeclarations(tree);
+            node.add(new SigmaNode({token}));
+            // return this.parseDeclarations(tree);
+            token = this.parseVariable(node);
         }
 
         if (token.value !== ':') {
             throw new ParserError('Variables should have types', token);
         }
-        tree.add(new SigmaNode({token}));
+        node.add(new SigmaNode({token}));
 
-        token = this.parseAttributeBlock(tree);
+        token = this.parseAttributeBlock(node);
 
         if (token.value !== ';') {
             throw new ParserError('Punctuation error, `;` expected', token);
@@ -168,10 +167,31 @@ export class Parser {
         return this.parseDeclarations(tree);
     }
 
-    parseAttributeBlock(tree) {
+    parseVariable(tree) {
         let token = this.getNextToken();
-        this.parseAttribute(token, tree);
-        return this.parseAttributesList(tree);
+        if (!TokenType.isIdentifier(token.type)) {
+            return token;
+        }
+        const node = new SigmaNode({name: '<variable>'});
+        node.add(new SigmaNode({token}));
+        tree.add(node);
+
+        token = this.getNextToken();
+        if (token.value === ',') {
+            tree.add(new SigmaNode({token}));
+            // return this.parseDeclarations(tree);
+            token = this.parseVariable(tree);
+        }
+
+        return token;
+    }
+
+    parseAttributeBlock(tree) {
+        const node = new SigmaNode({name: '<attribute>'});
+        tree.add(node);
+        let token = this.getNextToken();
+        this.parseAttribute(token, node);
+        return this.parseAttributesList(node);
     }
 
     parseAttributesList(tree) {
