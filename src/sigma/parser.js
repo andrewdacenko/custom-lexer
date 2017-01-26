@@ -66,9 +66,11 @@ export class Parser {
         if (!TokenType.isIdentifier(token.type)) {
             throw new ParserError(`Program should have name`, token);
         }
-        const identifier = new SigmaNode({name: '<procedure-identifier>'});
+        const procedure = new SigmaNode({name: '<procedure-identifier>'});
+        const identifier = new SigmaNode({name: '<identifier>'});
         identifier.add(new SigmaNode({token}));
-        node.add(identifier);
+        procedure.add(identifier);
+        node.add(procedure);
 
         token = this.getNextToken();
         if (token.value !== ';') {
@@ -133,22 +135,50 @@ export class Parser {
         throw new ParserError('Unexpected input', token);
     }
 
+
+    parseDeclarationBlock(token, tree) {
+        this.parseDeclaration(token, tree);
+        return this.parseDeclarationsList(tree);
+    }
+
+    parseDeclarationsList(tree) {
+        let token = this.getNextToken();
+        if (token.value === ';') {
+            return token;
+        }
+
+        if (token.value !== ',') {
+            return token;
+        }
+        tree.add(new SigmaNode({token}));
+
+        token = this.getNextToken();
+        this.parseDeclaration(token, tree);
+        return this.parseDeclarationsList(tree);
+    }
+
+    parseDeclaration(token, tree) {
+        const node = new SigmaNode({name: '<variable>'});
+        tree.add(node);
+        if (!TokenType.isIdentifier(token.type)) {
+            throw new ParserError('Identifier expected', token);
+        }
+        const identifier = new SigmaNode({name: '<identifier>'});
+        identifier.add(new SigmaNode({token}));
+        node.add(identifier);
+
+        return token;
+    }
+
     parseDeclarations(tree) {
         let token = this.getNextToken();
         if (!TokenType.isIdentifier(token.type)) {
             return token;
         }
         const node = new SigmaNode({name: '<declaration>'});
-        const variable = new SigmaNode({name: '<variable>'});
-        variable.add(new SigmaNode({token}));
-        node.add(variable);
         tree.add(node);
 
-        token = this.getNextToken();
-        if (token.value === ',') {
-            node.add(new SigmaNode({token}));
-            token = this.parseVariable(node);
-        }
+        token = this.parseDeclarationBlock(token, node);
 
         if (token.value !== ':') {
             throw new ParserError('Variables should have types', token);
@@ -163,24 +193,6 @@ export class Parser {
         tree.add(new SigmaNode({token}));
 
         return this.parseDeclarations(tree);
-    }
-
-    parseVariable(tree) {
-        let token = this.getNextToken();
-        if (!TokenType.isIdentifier(token.type)) {
-            return token;
-        }
-        const node = new SigmaNode({name: '<variable>'});
-        node.add(new SigmaNode({token}));
-        tree.add(node);
-
-        token = this.getNextToken();
-        if (token.value === ',') {
-            tree.add(new SigmaNode({token}));
-            token = this.parseVariable(tree);
-        }
-
-        return token;
     }
 
     parseAttributeBlock(tree) {
