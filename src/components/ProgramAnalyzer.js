@@ -3,7 +3,7 @@ import Chip from 'material-ui/Chip';
 import {Card, CardText} from 'material-ui/Card';
 
 import {InformationTable} from './InformationTable';
-import {ProgramTree} from './ProgramTree';
+import {TreeView} from './TreeView';
 import {Parser} from './../sigma/parser';
 
 export class ProgramAnalyzer extends Component {
@@ -46,9 +46,9 @@ export class ProgramAnalyzer extends Component {
                 {token.type} `<b>{token.value}</b>`
                 {' at '}
                 <b>
-                <span>{token.loc.start.line}:{token.loc.start.column}</span>
-                {' - '}
-                <span>{token.loc.end.line}:{token.loc.end.column}</span>
+                    <span>{token.loc.start.line}:{token.loc.start.column}</span>
+                    {' - '}
+                    <span>{token.loc.end.line}:{token.loc.end.column}</span>
                 </b>
             </Chip>
         ));
@@ -62,7 +62,7 @@ export class ProgramAnalyzer extends Component {
         ));
     }
 
-    renderAnalyzeErrors(tokens) {
+    renderSyntax(tokens) {
         let report, tree;
 
         if (tokens.errors.length) {
@@ -73,16 +73,13 @@ export class ProgramAnalyzer extends Component {
             const parser = new Parser(tokens);
             tree = parser.parse();
 
-            report = <Chip style={this.styles.successChip}>Syntax is Correct</Chip>;
+            report = <TreeView tree={tree} tables={tokens.tables}/>;
         } catch (err) {
             const pos = err.token ? ` at ${err.token.loc.start.line}:${err.token.loc.start.column}` : '';
             report = <Chip style={this.styles.errorChip}>{err.message} {pos}</Chip>;
         }
 
-        return <CardText style={this.styles.wrapper} key={'analyze-report'}>
-            {report}
-            <ProgramTree tree={tree} tables={tokens.tables} />
-        </CardText>;
+        return <CardText style={this.styles.wrapper} key={'analyze-report'}>{report}</CardText>;
     }
 
     renderTables(tokens) {
@@ -108,7 +105,7 @@ export class ProgramAnalyzer extends Component {
                         {this.renderTokens(tokens)}
                         {this.renderErrors(tokens)}
                     </CardText>
-                    {this.renderAnalyzeErrors(tokens)}
+                    {this.renderSyntax(tokens)}
                 </Card>
                 <div key="tables" style={this.styles.tables}>
                     {this.renderTables(tokens)}
