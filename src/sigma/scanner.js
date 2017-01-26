@@ -265,9 +265,9 @@ export class Scanner {
 
         let str = this.source[this.index];
         switch (str) {
-            case Punctuator.Plus:
-                return this.scanPhone();
-                break;
+            // case Punctuator.Plus:
+            //     return this.scanPhone();
+            //     break;
             case Punctuator.Dot:
                 ++this.index;
                 if (this.source[this.index] === Punctuator.Dot) {
@@ -278,6 +278,8 @@ export class Scanner {
                 break;
             case Punctuator.Semicolon:
             case Punctuator.Comma:
+            case Punctuator.Equal:
+            case Punctuator.Plus:
             case Punctuator.OpeningBracket:
             case Punctuator.ClosingBracket:
             case Punctuator.Colon:

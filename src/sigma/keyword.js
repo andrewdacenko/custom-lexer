@@ -1,7 +1,9 @@
 export const Keyword = {
+    IN: 'IN',
     END: 'END',
     VAR: 'VAR',
     EXT: 'EXT',
+    CASE: 'CASE',
     BEGIN: 'BEGIN',
     FLOAT: 'FLOAT',
     SIGNAL: 'SIGNAL',

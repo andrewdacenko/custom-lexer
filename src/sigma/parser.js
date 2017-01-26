@@ -109,13 +109,103 @@ export class Parser {
         }
         node.add(new SigmaNode({token}));
 
-        token = this.getNextToken();
+        token = this.parseStatementBlock(node);
         if (token.value !== Keyword.END) {
             throw new ParserError('Block should end with END keyword', token);
         }
         node.add(new SigmaNode({token}));
 
         tree.add(node);
+    }
+
+    parseStatementBlock(tree) {
+        const token = this.getNextToken();
+        if (token.value === Keyword.END) {
+            return token;
+        }
+        const node = new SigmaNode({name: '<statement>'});
+        tree.add(node);
+        this.parseStatement(token, node);
+        return this.parseStatementBlock(tree);
+    }
+
+    parseStatement(token, tree) {
+        if (token.value === Keyword.CASE) {
+            tree.add(new SigmaNode({token}));
+            return this.parseCaseStatement(tree);
+        }
+
+        if (!TokenType.isIdentifier(token.type)) {
+            throw new ParserError('Identifier or CASE expected in statement', token);
+        }
+
+        this.parseIdentifierStatement(token, tree);
+    }
+
+    parseCaseStatement(tree) {
+        let token = this.getNextToken();
+        if (!TokenType.isIdentifier(token.type)) {
+            throw new ParserError('Identifier expected', token);
+        }
+        const id = new SigmaNode({name: '<identifier>'});
+        id.add(new SigmaNode({token}));
+        tree.add(id);
+
+        token = this.getNextToken();
+        if (token.value !== Keyword.IN) {
+            throw new ParserError('IN keyword expected', token);
+        }
+        tree.add(new SigmaNode({token}));
+
+        token = this.getNextToken();
+        this.parseRange(token, tree);
+
+        token = this.getNextToken();
+        if (token.value !== ';') {
+            throw new ParserError('Semicolon expected', token);
+        }
+        tree.add(new SigmaNode({token}));
+    }
+
+    parseIdentifierStatement(token, tree) {
+        let id = new SigmaNode({name: '<identifier>'});
+        id.add(new SigmaNode({token}));
+        tree.add(id);
+
+        token = this.getNextToken();
+        if (token.value !== '=') {
+            throw new ParserError('Equals sign expected', token);
+        }
+        tree.add(new SigmaNode({token}));
+
+        token = this.getNextToken();
+        console.log(token);
+        if (!TokenType.isIdentifier(token.type)) {
+            throw new ParserError('Identifier expected', token);
+        }
+        id = new SigmaNode({name: '<identifier>'});
+        id.add(new SigmaNode({token}));
+        tree.add(id);
+
+        token = this.getNextToken();
+        if (token.value !== '+') {
+            throw new ParserError('Plus sign expected', token);
+        }
+        tree.add(new SigmaNode({token}));
+
+        token = this.getNextToken();
+        if (!TokenType.isIdentifier(token.type)) {
+            throw new ParserError('Identifier expected', token);
+        }
+        id = new SigmaNode({name: '<identifier>'});
+        id.add(new SigmaNode({token}));
+        tree.add(id);
+
+        token = this.getNextToken();
+        if (token.value !== ';') {
+            throw new ParserError('Semicolon expected', token);
+        }
+        tree.add(new SigmaNode({token}));
     }
 
     parseVariables(token, tree) {
