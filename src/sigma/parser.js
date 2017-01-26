@@ -135,7 +135,6 @@ export class Parser {
         throw new ParserError('Unexpected input', token);
     }
 
-
     parseDeclarationBlock(token, tree) {
         this.parseDeclaration(token, tree);
         return this.parseDeclarationsList(tree);
