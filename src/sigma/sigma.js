@@ -27,16 +27,22 @@ export function tokenize(code) {
     return tokens;
 
     function getTable(id) {
+        let index = id * 100;
         return (data, token) => {
             if (token.type !== TokenName[id]) {
                 return data;
             }
-            const index = ++data.index;
-            return {items: {...data.items, [token.value]: index}, index};
+            if (data[token.value]) {
+                return data;
+            }
+
+            ++index;
+
+            return {...data, [token.value]: index};
         }
     }
 
     function getTables(tokens, id) {
-        return tokens.reduce(getTable(id), {items: {}, index: id * 100}).items;
+        return tokens.reduce(getTable(id), {});
     }
 }
